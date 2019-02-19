@@ -44,8 +44,8 @@ namespace data_structures {
 
 		/*Private methods for removing tree nodes that have
 		two childs. There are two ways: right and left.*/
-		void rightRemove(const K&);
-		void leftRemove(const K&);
+		void rightRemove();
+		void leftRemove();
 
 	};
 
@@ -155,7 +155,7 @@ namespace data_structures {
 		if (key == *(this->key)) {
 			BinarySearchTree<K>* newChildValue = nullptr;
 			bool oneChild = true;
-			if isLeaf() {
+			if (isLeaf()) {
 				newChildValue = nullptr;
 			}
 			else if ((left != nullptr) && (right == nullptr)) {
@@ -177,11 +177,11 @@ namespace data_structures {
 				delete this;
 			}
 			else {
-				if (useLeftRemove) {
-					leftRemove(key);
+				if (useRightRemove) {
+					rightRemove();
 				}
 				else {
-					rightRemove(key);
+					leftRemove();
 				}
 			}
 		}
@@ -200,7 +200,12 @@ namespace data_structures {
 			finder = finder->left;
 		}
 		*(this->key) = *(finder->key);
-		finder->parent->left = nullptr;
+		if (finder->parent != this) {
+			finder->parent->left = nullptr;
+		}
+		else {
+			this->right = finder->right;
+		}
 		delete finder;
 	}
 
@@ -211,7 +216,12 @@ namespace data_structures {
 			finder = finder->right;
 		}
 		*(this->key) = *(finder->key);
-		finder->parent->right = nullptr;
+		if (finder->parent != this) {
+			finder->parent->right = nullptr;
+		}
+		else {
+			this->left = finder->left;
+		}
 		delete finder;
 	}
 
