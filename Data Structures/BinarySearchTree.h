@@ -21,9 +21,12 @@ namespace data_structures {
 		BinarySearchTree(K*, size_t);
 		BinarySearchTree(const std::list<K>&);
 		BinarySearchTree(const std::set<K>&);
-		//BinarySearchTree(const BinarySearchTree<K>&);
+		BinarySearchTree(const BinarySearchTree<K>&);
 		~BinarySearchTree();
 
+		/*Static method for building a BST from straight left traverse.
+		Takes two pointers as input: start and end + 1 (similar to qsort)
+		of an array of keys.*/
 		static BinarySearchTree* buildFromTraverse(K*, K*);
 
 		void add(K&);
@@ -31,16 +34,22 @@ namespace data_structures {
 		bool isEmpty() const;
 		bool isLeaf() const;
 
+		/*Methods for traversing the tree. All take as an argument 
+		a function which defines the action on every tree key.*/
 		void straightTraverseLeft(std::function<void(K&)>&);
 		void innerTraverseLeft(std::function<void(K&)>&);
 		void reverseTraverseLeft(std::function<void(K&)>&);
 
 	private:
 
-		//void rightRemove(const K&);
-		//void leftRemove(const K&);
+		/*Private methods for removing tree nodes that have
+		two childs. There are two ways: right and left.*/
+		void rightRemove(const K&);
+		void leftRemove(const K&);
 
 	};
+
+	/*Method implementations*/
 
 	template<class K>
 	BinarySearchTree<K>::BinarySearchTree() {
@@ -77,6 +86,16 @@ namespace data_structures {
 	}
 
 	template<class K>
+	BinarySearchTree<K>::BinarySearchTree(const BinarySearchTree<K>& tree) {
+		size_t vertices = 0;
+		tree->straightTraverseLeft([&vertices](K& key) { ++vertices; });
+		K* keys = new K[vertices];
+		size_t count = 0;
+		tree->straightTraverseLeft([&keys, &count](K& key) { keys[count++] = key; });
+		buildFromTraverse(keys);
+	}
+
+	template<class K>
 	BinarySearchTree<K>::~BinarySearchTree() {
 		delete left;
 		delete right;
@@ -86,12 +105,17 @@ namespace data_structures {
 	template<class K>
 	BinarySearchTree<K>* BinarySearchTree<K>::buildFromTraverse(K* start, K* end) {
 		if (start < end) {
-			BinarySearchTree<K>* temp = new BinarySearchTree<K>();
-			temp->key = new K(*start);
+			BinarySearchTree<K>* temp = new BinarySearchTree<K>(*start);
 			K* leftSub = start;
 			while ((leftSub < end) && (*(++leftSub) < *(temp->key)));
 			temp->left = buildFromTraverse(start + 1, leftSub);
+			if (temp->left != nullptr) {
+				temp->left->parent = temp;
+			}
 			temp->right = buildFromTraverse(leftSub, end);
+			if (temp->right != nullptr) {
+				temp->right->parent = temp;
+			}
 			return temp;
 		}
 		else {
@@ -127,28 +151,28 @@ namespace data_structures {
 	}
 
 	template<class K>
-	void BinarySearchTree<K>::remove(const K& key, bool useLeftRemove) {
+	void BinarySearchTree<K>::remove(const K& key, bool useRightRemove) {
 		if (key == *(this->key)) {
-			BinarySearchTree<K>* temp = nullptr;
+			BinarySearchTree<K>* newChildValue = nullptr;
 			bool oneChild = true;
 			if isLeaf() {
-				temp = nullptr;
+				newChildValue = nullptr;
 			}
 			else if ((left != nullptr) && (right == nullptr)) {
-				temp = left;
+				newChildValue = left;
 			}
 			else if ((left == nullptr) && (right != nullptr)) {
-				temp = right;
+				newChildValue = right;
 			}
 			else {
 				oneChild = false;
 			}
 			if (oneChild) {
 				if (this == parent->left) {
-					parent->left = temp;
+					parent->left = newChildValue;
 				}
 				else {
-					parent->right = temp;
+					parent->right = newChildValue;
 				}
 				delete this;
 			}
@@ -167,6 +191,28 @@ namespace data_structures {
 		else {
 			right->remove(key);
 		}
+	}
+
+	template<class K>
+	void BinarySearchTree<K>::rightRemove() {
+		BinarySearchTree<K>* finder = this->right;
+		while (finder->left != nullptr) {
+			finder = finder->left;
+		}
+		*(this->key) = *(finder->key);
+		finder->parent->left = nullptr;
+		delete finder;
+	}
+
+	template<class K>
+	void BinarySearchTree<K>::leftRemove() {
+		BinarySearchTree<K>* finder = this->left;
+		while (finder->right != nullptr) {
+			finder = finder->right;
+		}
+		*(this->key) = *(finder->key);
+		finder->parent->right = nullptr;
+		delete finder;
 	}
 
 	template<class K>
