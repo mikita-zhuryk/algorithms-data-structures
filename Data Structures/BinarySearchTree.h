@@ -21,8 +21,10 @@ namespace data_structures {
 		BinarySearchTree(K*, size_t);
 		BinarySearchTree(const std::list<K>&);
 		BinarySearchTree(const std::set<K>&);
+		//BinarySearchTree(const BinarySearchTree<K>&);
+		~BinarySearchTree();
 
-		//void buildFromTraverse(K*, size_t);
+		static BinarySearchTree* buildFromTraverse(K*, K*);
 
 		void add(K&);
 		void remove(const K&, bool = true);
@@ -49,8 +51,7 @@ namespace data_structures {
 	}
 
 	template<class K>
-	BinarySearchTree<K>::BinarySearchTree(K& key) {
-		BinarySearchTree();
+	BinarySearchTree<K>::BinarySearchTree(K& key) : BinarySearchTree() {
 		add(key);
 	}
 
@@ -72,6 +73,29 @@ namespace data_structures {
 	BinarySearchTree<K>::BinarySearchTree(const std::set<K>& keys) {
 		for (std::set<K>::const_iterator it = keys.begin(); it != keys.end(); ++it) {
 			add(*it);
+		}
+	}
+
+	template<class K>
+	BinarySearchTree<K>::~BinarySearchTree() {
+		delete left;
+		delete right;
+		delete key;
+	}
+
+	template<class K>
+	BinarySearchTree<K>* BinarySearchTree<K>::buildFromTraverse(K* start, K* end) {
+		if (start < end) {
+			BinarySearchTree<K>* temp = new BinarySearchTree<K>();
+			temp->key = new K(*start);
+			K* leftSub = start;
+			while ((leftSub < end) && (*(++leftSub) < *(temp->key)));
+			temp->left = buildFromTraverse(start + 1, leftSub);
+			temp->right = buildFromTraverse(leftSub, end);
+			return temp;
+		}
+		else {
+			return nullptr;
 		}
 	}
 
