@@ -1,6 +1,7 @@
 #include <fstream>
 #include <list>
 #include "../Data Structures/BinarySearchTree.h"
+#pragma comment(linker, "/STACK:67108864")
 
 void printList(std::list<int> list, std::ostream& out) {
 	size_t count = 0;
@@ -15,6 +16,7 @@ void printList(std::list<int> list, std::ostream& out) {
 }
 
 int main() {
+	std::ios_base::sync_with_stdio(false);
 	size_t n;
 	std::ifstream in("input.txt");
 	std::ofstream out("output.txt");
@@ -33,5 +35,6 @@ int main() {
 	out << "\n";
 	tree.innerTraverseLeft(buildList);
 	printList(result, out);
+	delete[] keys;
 	return 0;
 }
