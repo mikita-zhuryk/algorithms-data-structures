@@ -168,15 +168,27 @@ namespace data_structures {
 				oneChild = false;
 			}
 			if (oneChild) {
-				if (this == parent->left) {
-					parent->left = newChildValue;
+				if (parent != nullptr) {
+					if (this == parent->left) {
+						parent->left = newChildValue;
+					}
+					else {
+						parent->right = newChildValue;
+					}
+					this->left = nullptr;
+					this->right = nullptr;
+					delete this;
 				}
+				// Node to delete is the root
 				else {
-					parent->right = newChildValue;
+					BinarySearchTree<K>* temp = newChildValue;
+					*(this->key) = *(newChildValue->key);
+					this->left = newChildValue->left;
+					this->right = newChildValue->right;
+					temp->left = nullptr;
+					temp->right = nullptr;
+					delete temp;
 				}
-				this->left = nullptr;
-				this->right = nullptr;
-				delete this;
 			}
 			else {
 				if (useRightRemove) {
