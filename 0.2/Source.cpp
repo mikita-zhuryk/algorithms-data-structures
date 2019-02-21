@@ -3,6 +3,7 @@
 #pragma comment(linker, "/STACK:67108864")
 
 int main() {
+	std::ios_base::sync_with_stdio(false);
 	std::ifstream in("input.txt");
 	std::ofstream out("output.txt");
 	data_structures::BinarySearchTree<int> tree;
