@@ -107,7 +107,7 @@ namespace data_structures {
 		if (start < end) {
 			BinarySearchTree<K>* temp = new BinarySearchTree<K>(*start);
 			K* leftSub = start;
-			while ((leftSub < end) && (*(++leftSub) < *(temp->key)));
+			while ((leftSub < end) && (*(++leftSub) < *start));
 			temp->left = buildFromTraverse(start + 1, leftSub);
 			if (temp->left != nullptr) {
 				temp->left->parent = temp;
@@ -174,6 +174,8 @@ namespace data_structures {
 				else {
 					parent->right = newChildValue;
 				}
+				this->left = nullptr;
+				this->right = nullptr;
 				delete this;
 			}
 			else {
@@ -205,6 +207,10 @@ namespace data_structures {
 		}
 		else {
 			this->right = finder->right;
+			if (this->right != nullptr) {
+				this->right->parent = this;
+			}
+			finder->right = nullptr;
 		}
 		delete finder;
 	}
@@ -221,6 +227,10 @@ namespace data_structures {
 		}
 		else {
 			this->left = finder->left;
+			if (this->left != nullptr) {
+				this->left->parent = this;
+			}
+			finder->left = nullptr;
 		}
 		delete finder;
 	}
