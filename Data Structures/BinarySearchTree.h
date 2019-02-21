@@ -185,10 +185,10 @@ namespace data_structures {
 				}
 			}
 		}
-		else if (key < *(this->key)) {
+		else if ((key < *(this->key)) && (left != nullptr)) {
 			left->remove(key);
 		}
-		else {
+		else if (right != nullptr) {
 			right->remove(key);
 		}
 	}
