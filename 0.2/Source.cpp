@@ -1,5 +1,6 @@
 #include <fstream>
 #include "../Data Structures/BinarySearchTree.h"
+#pragma comment(linker, "/STACK:67108864")
 
 int main() {
 	std::ifstream in("input.txt");
