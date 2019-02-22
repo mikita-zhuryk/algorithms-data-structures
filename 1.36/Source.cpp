@@ -1,5 +1,6 @@
 #include <fstream>
 #include <list>
+#include <vector>
 #include "../Data Structures/BinarySearchTree.h"
 #pragma comment(linker, "/STACK:67108864")
 
@@ -21,20 +22,19 @@ int main() {
 	std::ifstream in("input.txt");
 	std::ofstream out("output.txt");
 	in >> n;
-	int* keys = new int[n];
+	std::vector<int> keys(n);
 	for (size_t i = 0; i < n; ++i) {
 		in >> keys[i];
 	}
 	data_structures::BinarySearchTree<int> tree;
 	std::list<int> result;
 	std::function<void(int&)> buildList = [&result](int key) { result.push_back(key); };
-	tree = *data_structures::BinarySearchTree<int>::buildFromTraverse(keys, keys + n);
+	tree = *data_structures::BinarySearchTree<int>::buildFromTraverse(keys);
 	tree.reverseTraverseLeft(buildList);
 	printList(result, out);
 	result.clear();
 	out << "\n";
 	tree.innerTraverseLeft(buildList);
 	printList(result, out);
-	delete[] keys;
 	return 0;
 }
