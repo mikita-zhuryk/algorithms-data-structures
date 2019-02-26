@@ -22,13 +22,14 @@ namespace data_structures {
 		BinarySearchTree(K*, size_t);
 		BinarySearchTree(const std::list<K>&);
 		BinarySearchTree(const std::set<K>&);
+		BinarySearchTree(std::vector<K>&);
 		BinarySearchTree(const BinarySearchTree<K>&);
 		~BinarySearchTree();
 
 		/*Static method for building a BST from straight left traverse.
 		Takes two pointers as input: start and end + 1 (similar to qsort)
 		of an array of keys.*/
-		static BinarySearchTree* buildFromTraverse(std::vector<K>&);
+		static BinarySearchTree* buildFromTraverse(K*&, K*&, K, K);
 
 		void add(K&);
 		void remove(const K&, bool = true);
@@ -87,6 +88,13 @@ namespace data_structures {
 	}
 
 	template<class K>
+	BinarySearchTree<K>::BinarySearchTree(std::vector<K>& keys) {
+		for (std::vector<K>::iterator it = keys.begin(); it != keys.end(); ++it) {
+			add(*it);
+		}
+	}
+
+	template<class K>
 	BinarySearchTree<K>::BinarySearchTree(const BinarySearchTree<K>& tree) {
 		size_t vertices = 0;
 		tree->straightTraverseLeft([&vertices](K& key) { ++vertices; });
@@ -103,80 +111,108 @@ namespace data_structures {
 		delete key;
 	}
 
-	template<class K>
-	BinarySearchTree<K>* BinarySearchTree<K>::buildFromTraverse(std::vector<K>& vec) {
-		size_t size = vec.size();
-		std::vector<K> diff(size - 1);
-		for (size_t i = 0; i < size - 1; ++i) {
-			diff[i] = vec[i + 1] - vec[i];
-		}
-		BinarySearchTree<K>* result = new BinarySearchTree<K>(vec[0]);
-		BinarySearchTree<K>* cur;
-		int summ_diff = diff[0];
-		bool startedRight = false;
-		if (diff[0] < 0) {
-			result->left = new BinarySearchTree<K>(vec[1]);
-			result->left->parent = result;
-			cur = result->left;
-		}
-		else {
-			result->right = new BinarySearchTree<K>(vec[1]);
-			result->right->parent = result;
-			cur = result->right;
-		}
-		for (size_t i = 1; i < size - 1; ++i) {
-			summ_diff += diff[i];
-			if (!startedRight && (summ_diff >= 0)) {
-				result->right = new BinarySearchTree<K>(vec[i + 1]);
-				result->right->parent = result;
-				cur = result->right;
-				startedRight = true;
+	template<>
+	BinarySearchTree<int>* BinarySearchTree<int>::buildFromTraverse(int*& start, int*& end, int min, int max) {
+		BinarySearchTree<int>* temp = nullptr;
+		if (start < end) {
+			if ((*start >= min) && (*start < max)) {
+				temp = new BinarySearchTree<int>(*start);
+				start++;
 			}
-			else {
-				if ((diff[i] > 0) && (diff[i - 1] < 0)) {
-					//go up
-					if (cur->parent != result) {
-						BinarySearchTree<K>* up = cur->parent;
-						while (vec[i + 1] > *(up->parent->key)) {
-							up = up->parent;
-						}
-						up->right = new BinarySearchTree<K>(vec[i + 1]);
-						up->right->parent = up;
-					}
-					else {
-						cur->right = new BinarySearchTree<K>(vec[i + 1]);
-						cur->right->parent = cur;
-					}
+			if (temp != nullptr) {
+				temp->left = buildFromTraverse(start, end, min, *(temp->key));
+				if (temp->left != nullptr) {
+					temp->left->parent = temp;
 				}
-				else if ((diff[i] < 0) && (diff[i - 1] > 0)) {
-					//go up
-					if (cur->parent != result) {
-						BinarySearchTree<K>* up = cur->parent;
-						while (vec[i + 1] < *(up->parent->key)) {
-							up = up->parent;
-						}
-						up->left = new BinarySearchTree<K>(vec[i + 1]);
-						up->left->parent = up;
-					}
-					else {
-						cur->left = new BinarySearchTree<K>(vec[i + 1]);
-						cur->left->parent = cur;
-					}
-				}
-				else if ((diff[i] < 0) && (diff[i - 1] < 0)) {
-					cur->left = new BinarySearchTree<K>(vec[i + 1]);
-					cur->left->parent = cur;
-					cur = cur->left;
-				}
-				else if ((diff[i] > 0) && (diff[i - 1] > 0)) {
-					cur->right = new BinarySearchTree<K>(vec[i + 1]);
-					cur->right->parent = cur;
-					cur = cur->right;
+				temp->right = buildFromTraverse(start, end, *(temp->key), max);
+				if (temp->right != nullptr) {
+					temp->right->parent = temp;
 				}
 			}
 		}
-		return result;
+		return temp;
 	}
+
+	//template<>
+	//BinarySearchTree<int>* BinarySearchTree<int>::buildFromTraverse(std::vector<int>& vec) {
+	//	size_t size = vec.size();
+	//	std::vector<long long> diff(size - 1);
+	//	for (size_t i = 0; i < size - 1; ++i) {
+	//		diff[i] = vec[i + 1] - vec[i];
+	//	}
+	//	BinarySearchTree<int>* result = new BinarySearchTree<int>(vec[0]);
+	//	BinarySearchTree<int>* cur;
+	//	int summ_diff = diff[0];
+	//	bool startedRight = false;
+	//	if (diff[0] < 0) {
+	//		result->left = new BinarySearchTree<int>(vec[1]);
+	//		result->left->parent = result;
+	//		cur = result->left;
+	//	}
+	//	else {
+	//		result->right = new BinarySearchTree<int>(vec[1]);
+	//		result->right->parent = result;
+	//		cur = result->right;
+	//	}
+	//	for (size_t i = 1; i < size - 1; ++i) {
+	//		summ_diff += diff[i];
+	//		if (!startedRight && (summ_diff >= 0)) {
+	//			result->right = new BinarySearchTree<int>(vec[i + 1]);
+	//			result->right->parent = result;
+	//			cur = result->right;
+	//			startedRight = true;
+	//		}
+	//		else {
+	//			if ((diff[i] >= 0) && (diff[i - 1] < 0)) {
+	//				//go up
+	//				BinarySearchTree<int>* up = cur;
+	//				while ((up->parent != nullptr) && (vec[i + 1] >= *(up->parent->key))) {
+	//					if (up->parent->parent != nullptr) {
+	//						up = up->parent;
+	//						if (vec[i + 1] < *(up->parent->key)) {
+	//							break;
+	//						}
+	//					}
+	//					else {
+	//						break;
+	//					}
+	//				}
+	//				up->right = new BinarySearchTree<int>(vec[i + 1]);
+	//				up->right->parent = up;
+	//				cur = up->right;
+	//			}
+	//			else if ((diff[i] < 0) && (diff[i - 1] > 0)) {
+	//				//go up
+	//				BinarySearchTree<int>* up = cur;
+	//				while ((up->parent != nullptr) && (vec[i + 1] <= *(up->parent->key))) {
+	//					if (up->parent->parent != nullptr) {
+	//						up = up->parent;
+	//						if (vec[i + 1] < *(up->parent->key)) {
+	//							break;
+	//						}
+	//					}
+	//					else {
+	//						break;
+	//					}
+	//				}
+	//				up->left = new BinarySearchTree<int>(vec[i + 1]);
+	//				up->left->parent = up;
+	//				cur = up->left;
+	//			}
+	//			else if ((diff[i] <= 0) && (diff[i - 1] < 0)) {
+	//				cur->left = new BinarySearchTree<int>(vec[i + 1]);
+	//				cur->left->parent = cur;
+	//				cur = cur->left;
+	//			}
+	//			else if ((diff[i] >= 0) && (diff[i - 1] >= 0)) {
+	//				cur->right = new BinarySearchTree<int>(vec[i + 1]);
+	//				cur->right->parent = cur;
+	//				cur = cur->right;
+	//			}
+	//		}
+	//	}
+	//	return result;
+	//}
 
 	template<class K>
 	void BinarySearchTree<K>::add(K& key) {
