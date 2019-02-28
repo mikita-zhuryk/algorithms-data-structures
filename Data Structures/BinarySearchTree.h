@@ -36,7 +36,7 @@ namespace data_structures {
 		bool isEmpty() const;
 		bool isLeaf() const;
 
-		/*Methods for traversing the tree. All take as an argument 
+		/*Methods for traversing the tree. All take as an argument
 		a function which defines the action on every tree key.*/
 		void straightTraverseLeft(std::function<void(K&)>&);
 		void innerTraverseLeft(std::function<void(K&)>&);
@@ -133,87 +133,6 @@ namespace data_structures {
 		return temp;
 	}
 
-	//template<>
-	//BinarySearchTree<int>* BinarySearchTree<int>::buildFromTraverse(std::vector<int>& vec) {
-	//	size_t size = vec.size();
-	//	std::vector<long long> diff(size - 1);
-	//	for (size_t i = 0; i < size - 1; ++i) {
-	//		diff[i] = vec[i + 1] - vec[i];
-	//	}
-	//	BinarySearchTree<int>* result = new BinarySearchTree<int>(vec[0]);
-	//	BinarySearchTree<int>* cur;
-	//	int summ_diff = diff[0];
-	//	bool startedRight = false;
-	//	if (diff[0] < 0) {
-	//		result->left = new BinarySearchTree<int>(vec[1]);
-	//		result->left->parent = result;
-	//		cur = result->left;
-	//	}
-	//	else {
-	//		result->right = new BinarySearchTree<int>(vec[1]);
-	//		result->right->parent = result;
-	//		cur = result->right;
-	//	}
-	//	for (size_t i = 1; i < size - 1; ++i) {
-	//		summ_diff += diff[i];
-	//		if (!startedRight && (summ_diff >= 0)) {
-	//			result->right = new BinarySearchTree<int>(vec[i + 1]);
-	//			result->right->parent = result;
-	//			cur = result->right;
-	//			startedRight = true;
-	//		}
-	//		else {
-	//			if ((diff[i] >= 0) && (diff[i - 1] < 0)) {
-	//				//go up
-	//				BinarySearchTree<int>* up = cur;
-	//				while ((up->parent != nullptr) && (vec[i + 1] >= *(up->parent->key))) {
-	//					if (up->parent->parent != nullptr) {
-	//						up = up->parent;
-	//						if (vec[i + 1] < *(up->parent->key)) {
-	//							break;
-	//						}
-	//					}
-	//					else {
-	//						break;
-	//					}
-	//				}
-	//				up->right = new BinarySearchTree<int>(vec[i + 1]);
-	//				up->right->parent = up;
-	//				cur = up->right;
-	//			}
-	//			else if ((diff[i] < 0) && (diff[i - 1] > 0)) {
-	//				//go up
-	//				BinarySearchTree<int>* up = cur;
-	//				while ((up->parent != nullptr) && (vec[i + 1] <= *(up->parent->key))) {
-	//					if (up->parent->parent != nullptr) {
-	//						up = up->parent;
-	//						if (vec[i + 1] < *(up->parent->key)) {
-	//							break;
-	//						}
-	//					}
-	//					else {
-	//						break;
-	//					}
-	//				}
-	//				up->left = new BinarySearchTree<int>(vec[i + 1]);
-	//				up->left->parent = up;
-	//				cur = up->left;
-	//			}
-	//			else if ((diff[i] <= 0) && (diff[i - 1] < 0)) {
-	//				cur->left = new BinarySearchTree<int>(vec[i + 1]);
-	//				cur->left->parent = cur;
-	//				cur = cur->left;
-	//			}
-	//			else if ((diff[i] >= 0) && (diff[i - 1] >= 0)) {
-	//				cur->right = new BinarySearchTree<int>(vec[i + 1]);
-	//				cur->right->parent = cur;
-	//				cur = cur->right;
-	//			}
-	//		}
-	//	}
-	//	return result;
-	//}
-
 	template<class K>
 	void BinarySearchTree<K>::add(K& key) {
 		if (isEmpty()) {
@@ -266,6 +185,10 @@ namespace data_structures {
 					else {
 						parent->right = newChildValue;
 					}
+					if (newChildValue != nullptr) {
+						newChildValue->parent = parent;
+					}
+					this->parent = nullptr;
 					this->left = nullptr;
 					this->right = nullptr;
 					delete this;
@@ -276,6 +199,12 @@ namespace data_structures {
 					*(this->key) = *(newChildValue->key);
 					this->left = newChildValue->left;
 					this->right = newChildValue->right;
+					if (left != nullptr) {
+						left->parent = this;
+					}
+					if (right != nullptr) {
+						right->parent = this;
+					}
 					temp->left = nullptr;
 					temp->right = nullptr;
 					delete temp;
@@ -290,11 +219,15 @@ namespace data_structures {
 				}
 			}
 		}
-		else if ((key < *(this->key)) && (left != nullptr)) {
-			left->remove(key);
+		else if (key < *(this->key)) {
+			if (left != nullptr) {
+				left->remove(key);
+			}
 		}
-		else if (right != nullptr) {
-			right->remove(key);
+		else {
+			if (right != nullptr) {
+				right->remove(key);
+			}
 		}
 	}
 
@@ -306,15 +239,20 @@ namespace data_structures {
 		}
 		*(this->key) = *(finder->key);
 		if (finder->parent != this) {
-			finder->parent->left = nullptr;
+			finder->parent->left = finder->right;
+			if (finder->right != nullptr) {
+				finder->right->parent = finder->parent;
+			}
 		}
 		else {
 			this->right = finder->right;
 			if (this->right != nullptr) {
 				this->right->parent = this;
 			}
-			finder->right = nullptr;
 		}
+		finder->parent = nullptr;
+		finder->left = nullptr;
+		finder->right = nullptr;
 		delete finder;
 	}
 
@@ -326,15 +264,20 @@ namespace data_structures {
 		}
 		*(this->key) = *(finder->key);
 		if (finder->parent != this) {
-			finder->parent->right = nullptr;
+			finder->parent->right = finder->left;
+			if (finder->left != nullptr) {
+				finder->left->parent = finder->parent;
+			}
 		}
 		else {
 			this->left = finder->left;
 			if (this->left != nullptr) {
 				this->left->parent = this;
 			}
-			finder->left = nullptr;
 		}
+		finder->parent = nullptr;
+		finder->left = nullptr;
+		finder->right = nullptr;
 		delete finder;
 	}
 
