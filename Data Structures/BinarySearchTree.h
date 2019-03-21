@@ -6,6 +6,8 @@
 
 namespace data_structures {
 
+	//TODO: Add constant static std::functions for building a list, printing, etc. to the class
+
 	template <class K>
 	class BinarySearchTree {
 
@@ -30,6 +32,8 @@ namespace data_structures {
 		Takes two pointers as input: start and end + 1 (similar to qsort)
 		of an array of keys.*/
 		static BinarySearchTree* buildFromTraverse(K*&, K*&, K, K);
+
+		static void sort(std::vector<K>&);
 
 		void add(K&);
 		void remove(const K&, bool = true);
@@ -131,6 +135,14 @@ namespace data_structures {
 			}
 		}
 		return temp;
+	}
+
+	template<class K>
+	void BinarySearchTree<K>::sort(std::vector<K>& vec) {
+		BinarySearchTree<K> tree(vec);
+		std::vector<K>::iterator b = vec.begin();
+		std::function<void(int&)> s = [&b](int& key) { *(b++) = key; };
+		tree.innerTraverseLeft(s);
 	}
 
 	template<class K>
