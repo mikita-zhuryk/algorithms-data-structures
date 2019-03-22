@@ -115,9 +115,7 @@ vector<vector<Cell>> find_CS_lengths(char* big, size_t& size_big, char* small, s
 			}
 			//cout << i << endl;
 			//printAngle(angle, n - 1);
-			for (size_t i = 0; i < n - 1; ++i) {
-				angle[0][i] = angle[1][i];
-			}
+			swap(angle[0], angle[1]);
 		}
 		result_size = cs_lengths[m - 1][n - 1].value;
 		//printMatrix(cs_lengths);
