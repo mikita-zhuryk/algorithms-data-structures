@@ -10,8 +10,9 @@ void fillTXT(std::string path, std::size_t n) {
 	for (size_t i = 0; i < n; ++i) {
 		numbers.push_back(rand() % 1000);
 	}
-	out << numbers[rand() % numbers.size()] << "\n" << "\n";
+	//out << numbers[rand() % numbers.size()] << "\n" << "\n";
+	out << n << '\n';
 	for (size_t i = 0; i < n; ++i) {
-		out << numbers[i] << "\n";
+		out << numbers[i] << ' ';
 	}
 }
