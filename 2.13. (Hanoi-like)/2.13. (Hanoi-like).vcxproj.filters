@@ -21,12 +21,21 @@
     <ClCompile Include="New.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GraphBFSWave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt">
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="out.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="temp.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="temp1.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
