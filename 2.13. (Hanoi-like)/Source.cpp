@@ -29,17 +29,17 @@
 //	if (x <= 0) {
 //		return 0;
 //	}
-//	if (s.third == x) {
-//		return 0;
-//	}
+	//if (s.third == x) {
+	//	return 0;
+	//}
 //	if (binary_search(measures.begin(), measures.end(), x)) {
 //		return 2;
 //	}
-//	if (s.first && s.second) {
-//		++s.actions;
-//		s.first += s.second;
-//		s.second = 0;
-//	}
+	//if (s.first && s.second) {
+	//	++s.actions;
+	//	s.first += s.second;
+	//	s.second = 0;
+	//}
 //	size_t m = measures.size();
 //	vector<vector<short>> summary(m);
 //	size_t max_length = 1 + x / measures[0];
