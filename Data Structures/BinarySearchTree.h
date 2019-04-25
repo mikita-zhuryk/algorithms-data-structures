@@ -37,6 +37,7 @@ namespace data_structures {
 
 		void add(K&);
 		void remove(const K&, bool = true);
+		BinarySearchTree<K>* find(const K&);
 		bool isEmpty() const;
 		bool isLeaf() const;
 
@@ -241,6 +242,20 @@ namespace data_structures {
 				right->remove(key);
 			}
 		}
+	}
+
+	template<class K>
+	BinarySearchTree<K>* BinarySearchTree<K>::find(const K& key) {
+		BinarySearchTree<K>* ptr = this;
+		while (ptr && ptr->key != key) {
+			if (key < ptr->key) {
+				ptr = ptr->left;
+			}
+			else {
+				ptr = ptr->right;
+			}
+		}
+		return ptr;
 	}
 
 	template<class K>
