@@ -51,15 +51,9 @@ vector<vector<int>> kosaraju(vector<vector<edge>>& adjList, vector<int>& matchin
 	vector<vector<int>> components;
 	for (size_t i = 0; i < adjList.size() / 2; ++i) {
 		dfsComp(adjList, i, visited, comp);
-		//if two guys are in one component, they share girls
 		components.push_back(comp);
 		comp.clear();
 		comp.resize(0);
-		/*for (size_t j = adjList.size() / 2; j < visited.size(); ++j) {
-			if (!binary_search(matching.begin(), matching.end(), j)) {
-				visited[j] = false;
-			}
-		}*/
 	}
 	return components;
 }
@@ -99,20 +93,36 @@ int main() {
 	}
 	auto components = kosaraju(adj, matching);
 	size_t j = 0;
-	for (auto& component : components) {
-		out << component.size() - 1 << ' ';
+	for (size_t i = 0; i < components.size(); ++i) {
 		j = 0;
-		sort(component.begin(), component.end());
-		for (size_t i = 1; i < component.size(); ++i) {
-			/*if (component[i] >= n) {
-				component[i] = component[i] - n + 1;
-			}*/
-			out << component[i] + 1;
-			if (i != component.size() - 1) {
-				out << ' ';
+		sort(components[i].begin(), components[i].end());
+		while (components[i][j] < n) {
+			++j;
+			if (j == components[i].size()) {
+				break;
 			}
 		}
-		out << endl;
+		if (j == 1) {
+			out << 1 << ' ' << matching[i] - n + 1 << endl;
+		}
+		else {
+			for (size_t k = 1; k < j; ++k) {
+				if (components[i][k] > i) {
+					components[components[i][k]].clear();
+					for (size_t s = 0; s < components[i].size(); ++s) {
+						components[components[i][k]].push_back(components[i][s]);
+					}
+				}
+			}
+			out << components[i].size() - j << ' ';
+			for (size_t k = j; k < components[i].size(); ++k) {
+				out << components[i][k] - n + 1;
+				if (k != components[i].size() - 1) {
+					out << ' ';
+				}
+			}
+			out << endl;
+		}
 	}
 	return 0;
 }
