@@ -13,48 +13,48 @@ typedef pair<short, int> polyArea;
 
 namespace data_structures {
 
-	template<typename T>
-	class Tree {
+	class DSU2D {
 
-		T value;
-		Tree* parent;
-		vector<Tree*> children;
-
-		void add(Tree* where, T what);
-		void remove(Tree* what);
-		Tree* find(T what);
-
-	};
-
-	template<typename T>
-	class DSU {
-
-		vector<vector<pair<int, T>>> trees;
-		size_t nTrees;
+		vector<vector<point>> trees;
 
 	public:
 
-		void createSingleton(T& value) {
-			auto vec = vector<pair<int, T>>(1);
-			vec[0] = make_pair(-1, value);
-			trees.push_back(vec);
-			++nTrees;
+		DSU2D() : trees{ vector<vector<point>>(b, vector<point>(a, make_pair(-1, -1))) } {}
+
+		void mergeSets(point set1Index, point set2Index) {
+			if (set1Index != set2Index) {
+				if (trees[set1Index.first][set1Index.second].first < trees[set2Index.first][set2Index.second].first) {
+					trees[set1Index.first][set1Index.second].first += trees[set2Index.first][set2Index.second].first;
+					trees[set1Index.first][set1Index.second].second = trees[set1Index.first][set1Index.second].first;
+					trees[set2Index.first][set2Index.second] = set1Index;
+				}
+				else {
+					trees[set2Index.first][set2Index.second].first += trees[set1Index.first][set1Index.second].first;
+					trees[set2Index.first][set2Index.second].second = trees[set2Index.first][set2Index.second].first;
+					trees[set1Index.first][set1Index.second] = set2Index;
+				}
+			}
 		}
 
-		void mergeSets(size_t set1Index, size_t set2Index) {
-			auto tree1 = trees[set1Index];
-			auto tree2 = trees[set2Index];
-			if (tree1.size() > tree2.size()) {
-
+		point find(point what) {
+			point cur = what;
+			point lastCur = cur;
+			while (trees[cur.first][cur.second].first > 0) {
+				lastCur = cur;
+				cur = trees[cur.first][cur.second];
 			}
-			else {
-
+			if (cur.first > 0) {
+				return cur;
 			}
-			--nTrees;
+			return lastCur;
 		}
 
-		size_t find(T& what) {
+		size_t size() const {
+			return trees.size();
+		}
 
+		point& get(size_t i, size_t j) {
+			return trees[i][j];
 		}
 
 	};
@@ -90,9 +90,9 @@ struct Rectangle {
 
 	void translate() {
 		leftLow.first += b / 2;
-		rightHigh.first += b / 2 - 1;
+		rightHigh.first += b / 2;
 		leftLow.second += a / 2;
-		rightHigh.second += a / 2 - 1;
+		rightHigh.second += a / 2;
 	}
 
 	short area() {
@@ -100,17 +100,19 @@ struct Rectangle {
 	}
 
 	bool contains(point x) {
-		return ((x.first >= leftLow.first) && (x.first <= rightHigh.first)) && ((x.second >= leftLow.second) && (x.second <= rightHigh.second));
+		return ((x.first >= leftLow.first) && (x.first < rightHigh.first)) && ((x.second >= leftLow.second) && (x.second < rightHigh.second));
 	}
 
 };
 
-short getColor(vector<Rectangle>& rects, point p) {
+short getColor(vector<Rectangle>& rects, int x, int y) {
+	point p = make_pair(x, y);
 	for (int i = rects.size() - 1; i >= 0; --i) {
 		if (rects[i].contains(p)) {
 			return rects[i].color;
 		}
 	}
+	return 1;
 }
 
 int main() {
@@ -119,61 +121,49 @@ int main() {
 	ofstream out("out.txt");
 	short n;
 	in >> a >> b >> n;
-	vector<Rectangle> rects(n + 1);
-	rects[0] = Rectangle(make_pair(-b / 2, -a / 2), make_pair(b / 2, a / 2), 1);
-	rects[0].translate();
-	rects[0].calcSides();
-	for (size_t i = 1; i < n + 1; ++i) {
+	vector<Rectangle> rects(n);
+	for (size_t i = 0; i < n; ++i) {
 		in >> rects[i].leftLow.first >> rects[i].leftLow.second;
 		in >> rects[i].rightHigh.first >> rects[i].rightHigh.second;
 		in >> rects[i].color;
 		rects[i].translate();
 		rects[i].calcSides();
 	}
-	bool** used = new bool*[b];
-	for (size_t i = 0; i < b; ++i) {
-		used[i] = new bool[a];
-		for (size_t j = 0; j < a; ++j) {
-			used[i][j] = false;
-		}
-	}
-	data_structures::DSU<point> rectanglesDSU;
+	data_structures::DSU2D rectanglesDSU;
 	short color = 0;
 	point cur;
-	size_t curDSUSet;
-	point toCheck;
-	for (size_t i = 0; i < b; ++i) {
-		for (size_t j = 0; j < a; ++j) {
-			used[i][j] = 1;
-			cur = make_pair(i, j);
-			color = getColor(rects, cur);
-			curDSUSet = rectanglesDSU.find(cur);
-			toCheck = make_pair(i - 1, j);
+	int toCheck;
+	for (size_t j = 0; j < a; ++j) {
+		for (size_t i = 0; i < b; ++i) {
+			cur = { i, j };
+			color = getColor(rects, i, j);
 			//merge if colors are the same
-			if ((i >= 1) && !used[i - 1][j] && (getColor(rects, toCheck) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find(toCheck), curDSUSet);
+			if ((i >= 1) && (getColor(rects, i - 1, j) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j }), rectanglesDSU.find(cur));
 			}
-			toCheck = make_pair(i - 1, j + 1);
-			if ((i >= 1) && (j + 1 < a) && !used[i - 1][j + 1] && (getColor(rects, i - 1, j + 1) == color)) {
-				rectanglesDSU.mergeSets(make_pair(i - 1, j + 1), cur);
+			if ((i >= 1) && (j >= 1) && (getColor(rects, i - 1, j - 1) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j - 1 }), rectanglesDSU.find(cur));
 			}
-			toCheck = make_pair(i, j + 1);
-			if ((j + 1 < a) && !used[i][j + 1] && (getColor(rects, i, j + 1) == color)) {
-				rectanglesDSU.mergeSets(make_pair(i, j + 1), cur);
-			}
-			toCheck = make_pair(i, j - 1);
-			if ((j >= 1) && !used[i][j - 1] && (getColor(rects, i, j - 1) == color)) {
-				rectanglesDSU.mergeSets(make_pair(i, j - 1), cur);
-			}
-			toCheck = make_pair(i - 1, j - 1);
-			if ((i >= 1) && (j >= 1) && !used[i - 1][j - 1] && (getColor(rects, i - 1, j - 1) == color)) {
-				rectanglesDSU.mergeSets(make_pair(i - 1, j - 1), cur);
+			if ((j >= 1) && (getColor(rects, i, j - 1) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find({ i, j - 1 }), rectanglesDSU.find(cur));
 			}
 		}
 	}
-	for (const auto& rect : rectanglesDSU) {
-		//print, maybe sort before
+	int s;
+	vector<pair<short, int>> rectangleAreas;
+	for (size_t i = 0; i < b; ++i) {
+		for (size_t j = 0; j < a; ++j) {
+			if ((s = rectanglesDSU.get(i, j).first) < 0) {
+				rectangleAreas.push_back({getColor(rects, i, j), -s});
+			}
+		}
 	}
-	system("pause");
+	sort(rectangleAreas.begin(), rectangleAreas.end(), [](pair<short, int>& area1, pair<short, int>& area2) {
+		return (area1.first < area2.first) || ((area1.first == area2.first) && (area1.second < area2.second));
+	});
+	size_t size = rectangleAreas.size();
+	for (size_t i = 0; i < size; ++i) {
+		out << rectangleAreas[i].first << ' ' << rectangleAreas[i].second << endl;
+	}
 	return 0;
 }
