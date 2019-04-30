@@ -147,6 +147,9 @@ int main() {
 			if ((j >= 1) && (getColor(rects, i, j - 1) == color)) {
 				rectanglesDSU.mergeSets(rectanglesDSU.find({ i, j - 1 }), rectanglesDSU.find(cur));
 			}
+			if ((i + 1 < b) && (j >= 1) && (getColor(rects, i + 1, j - 1) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find({ i + 1, j - 1 }), rectanglesDSU.find(cur));
+			}
 		}
 	}
 	int s;
