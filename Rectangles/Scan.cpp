@@ -22,6 +22,8 @@ namespace data_structures {
 		DSU2D() : trees{ vector<vector<point>>(b, vector<point>(a, make_pair(-1, -1))) } {}
 
 		void mergeSets(point set1Index, point set2Index) {
+			//since DSU is built upon a 2D array, we must work with both indices. If a vertex is a root,
+			//its value is equal to (-n, -n), where n is the number of elements in the tree
 			if (set1Index != set2Index) {
 				if (trees[set1Index.first][set1Index.second].first < trees[set2Index.first][set2Index.second].first) {
 					trees[set1Index.first][set1Index.second].first += trees[set2Index.first][set2Index.second].first;
@@ -39,12 +41,9 @@ namespace data_structures {
 		point find(point what) {
 			point cur = what;
 			point lastCur = cur;
-			while (trees[cur.first][cur.second].first > 0) {
+			while (cur.first >= 0) {
 				lastCur = cur;
 				cur = trees[cur.first][cur.second];
-			}
-			if (cur.first > 0) {
-				return cur;
 			}
 			return lastCur;
 		}
@@ -59,33 +58,65 @@ namespace data_structures {
 
 	};
 
+	class DSU {
+
+		vector<int> trees;
+
+	public:
+
+		DSU(size_t n) : trees(n * n, -1) {}
+
+		void mergeSets(int root1, int root2) {
+			if (root1 != root2) {
+				if (trees[root1] <= trees[root2]) {
+					trees[root1] += trees[root2];
+					trees[root2] = root1;
+				}
+				else {
+					trees[root2] += trees[root1];
+					trees[root1] = root2;
+				}
+			}
+		}
+
+		int find(int what) {
+			int cur = what;
+			int lastCur = cur;
+			while (cur >= 0) {
+				lastCur = cur;
+				cur = trees[cur];
+			}
+			return lastCur;
+		}
+
+		size_t size() const {
+			return trees.size();
+		}
+
+		int get(size_t i) {
+			return trees[i];
+		}
+
+	};
+
 }
 
 struct Rectangle {
 
 	point leftLow;
 	point rightHigh;
-	short width;
-	short height;
 	short color;
 
 	Rectangle() {
 		leftLow = make_pair(-1, -1);
 		rightHigh = make_pair(-1, -1);
 		color = 0;
-		calcSides();
 	}
 
 	Rectangle(point leftLow, point rightHigh, short color) {
 		this->leftLow = leftLow;
 		this->rightHigh = rightHigh;
 		this->color = color;
-		calcSides();
-	}
-
-	void calcSides() {
-		width = rightHigh.first - leftLow.first;
-		height = rightHigh.second - leftLow.second;
 	}
 
 	void translate() {
@@ -93,10 +124,6 @@ struct Rectangle {
 		rightHigh.first += b / 2;
 		leftLow.second += a / 2;
 		rightHigh.second += a / 2;
-	}
-
-	short area() {
-		return height * width;
 	}
 
 	bool contains(point x) {
@@ -115,6 +142,26 @@ short getColor(vector<Rectangle>& rects, int x, int y) {
 	return 1;
 }
 
+void drawColors(vector<Rectangle>& rects) {
+	short** colors = new short*[b];
+	for (short i = 0; i < b; ++i) {
+		colors[i] = new short[a];
+		for (short j = 0; j < a; ++j) {
+			colors[i][j] = getColor(rects, i, j);
+		}
+	}
+	for (short j = a - 1; j >= 0; --j) {
+		for (short i = 0; i < b; ++i) {
+			cout << (short)colors[i][j] << ' ';
+		}
+		cout << endl;
+	}
+	for (short i = 0; i < b; ++i) {
+		delete[] colors[i];
+	}
+	delete[] colors;
+}
+
 int main() {
 	ios_base::sync_with_stdio(false);
 	ifstream in("in.txt");
@@ -127,41 +174,46 @@ int main() {
 		in >> rects[i].rightHigh.first >> rects[i].rightHigh.second;
 		in >> rects[i].color;
 		rects[i].translate();
-		rects[i].calcSides();
 	}
-	data_structures::DSU2D rectanglesDSU;
+	int m = max(a, b);
+	data_structures::DSU rectanglesDSU(m);
 	short color = 0;
-	point cur;
-	int toCheck;
+	//point cur;
+	int cur;
 	for (size_t j = 0; j < a; ++j) {
 		for (size_t i = 0; i < b; ++i) {
-			cur = { i, j };
+			//cur = { i, j };
+			cur = i * m + j;
 			color = getColor(rects, i, j);
 			//merge if colors are the same
 			if ((i >= 1) && (getColor(rects, i - 1, j) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j }), rectanglesDSU.find(cur));
+				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j }), rectanglesDSU.find(cur));
+				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j), rectanglesDSU.find(cur));
 			}
 			if ((i >= 1) && (j >= 1) && (getColor(rects, i - 1, j - 1) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j - 1 }), rectanglesDSU.find(cur));
+				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j - 1 }), rectanglesDSU.find(cur));
+				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j - 1), rectanglesDSU.find(cur));
 			}
 			if ((j >= 1) && (getColor(rects, i, j - 1) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find({ i, j - 1 }), rectanglesDSU.find(cur));
+				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i, j - 1 }), rectanglesDSU.find(cur));
+				rectanglesDSU.mergeSets(rectanglesDSU.find(i * m + j - 1), rectanglesDSU.find(cur));
 			}
-			if ((i + 1 < b) && (j >= 1) && (getColor(rects, i + 1, j - 1) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find({ i + 1, j - 1 }), rectanglesDSU.find(cur));
+			if ((i >= 1) && (j + 1 < a) && (getColor(rects, i - 1, j + 1) == color)) {
+				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j + 1 }), rectanglesDSU.find(cur));
+				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j + 1), rectanglesDSU.find(cur));
 			}
 		}
 	}
 	int s;
-	vector<pair<short, int>> rectangleAreas;
+	vector<polyArea> rectangleAreas;
 	for (size_t i = 0; i < b; ++i) {
 		for (size_t j = 0; j < a; ++j) {
-			if ((s = rectanglesDSU.get(i, j).first) < 0) {
-				rectangleAreas.push_back({getColor(rects, i, j), -s});
+			if ((s = rectanglesDSU.get(i * m + j)) < 0) {
+				rectangleAreas.push_back({ getColor(rects, i, j), -s });
 			}
 		}
 	}
-	sort(rectangleAreas.begin(), rectangleAreas.end(), [](pair<short, int>& area1, pair<short, int>& area2) {
+	sort(rectangleAreas.begin(), rectangleAreas.end(), [](polyArea& area1, polyArea& area2) {
 		return (area1.first < area2.first) || ((area1.first == area2.first) && (area1.second < area2.second));
 	});
 	size_t size = rectangleAreas.size();
