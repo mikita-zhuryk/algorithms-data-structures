@@ -178,28 +178,34 @@ int main() {
 	int m = max(a, b);
 	data_structures::DSU rectanglesDSU(m);
 	short color = 0;
-	//point cur;
 	int cur;
 	for (size_t j = 0; j < a; ++j) {
 		for (size_t i = 0; i < b; ++i) {
-			//cur = { i, j };
 			cur = i * m + j;
 			color = getColor(rects, i, j);
 			//merge if colors are the same
 			if ((i >= 1) && (getColor(rects, i - 1, j) == color)) {
-				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j }), rectanglesDSU.find(cur));
 				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j), rectanglesDSU.find(cur));
 			}
 			if ((i >= 1) && (j >= 1) && (getColor(rects, i - 1, j - 1) == color)) {
-				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j - 1 }), rectanglesDSU.find(cur));
 				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j - 1), rectanglesDSU.find(cur));
 			}
 			if ((j >= 1) && (getColor(rects, i, j - 1) == color)) {
-				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i, j - 1 }), rectanglesDSU.find(cur));
 				rectanglesDSU.mergeSets(rectanglesDSU.find(i * m + j - 1), rectanglesDSU.find(cur));
 			}
+			if ((j >= 1) && (i + 1 < b) && (getColor(rects, i + 1, j - 1) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find((i + 1) * m + j - 1), rectanglesDSU.find(cur));
+			}
+			if ((i + 1 < b) && (getColor(rects, i + 1, j) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find((i + 1) * m + j), rectanglesDSU.find(cur));
+			}
+			if ((i + 1 < b) && (j + 1 < a) && (getColor(rects, i + 1, j + 1) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find((i + 1) * m + j + 1), rectanglesDSU.find(cur));
+			}
+			if ((j + 1 < a) && (getColor(rects, i, j + 1) == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find(i * m + j + 1), rectanglesDSU.find(cur));
+			}
 			if ((i >= 1) && (j + 1 < a) && (getColor(rects, i - 1, j + 1) == color)) {
-				//rectanglesDSU.mergeSets(rectanglesDSU.find({ i - 1, j + 1 }), rectanglesDSU.find(cur));
 				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j + 1), rectanglesDSU.find(cur));
 			}
 		}
