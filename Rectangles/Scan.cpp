@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <map>
 
 using namespace std;
 
@@ -13,50 +14,50 @@ typedef pair<short, int> polyArea;
 
 namespace data_structures {
 
-	class DSU2D {
+	//class DSU2D {
 
-		vector<vector<point>> trees;
+	//	vector<vector<point>> trees;
 
-	public:
+	//public:
 
-		DSU2D() : trees{ vector<vector<point>>(b, vector<point>(a, make_pair(-1, -1))) } {}
+	//	DSU2D() : trees{ vector<vector<point>>(b, vector<point>(a, make_pair(-1, -1))) } {}
 
-		void mergeSets(point set1Index, point set2Index) {
-			//since DSU is built upon a 2D array, we must work with both indices. If a vertex is a root,
-			//its value is equal to (-n, -n), where n is the number of elements in the tree
-			if (set1Index != set2Index) {
-				if (trees[set1Index.first][set1Index.second].first < trees[set2Index.first][set2Index.second].first) {
-					trees[set1Index.first][set1Index.second].first += trees[set2Index.first][set2Index.second].first;
-					trees[set1Index.first][set1Index.second].second = trees[set1Index.first][set1Index.second].first;
-					trees[set2Index.first][set2Index.second] = set1Index;
-				}
-				else {
-					trees[set2Index.first][set2Index.second].first += trees[set1Index.first][set1Index.second].first;
-					trees[set2Index.first][set2Index.second].second = trees[set2Index.first][set2Index.second].first;
-					trees[set1Index.first][set1Index.second] = set2Index;
-				}
-			}
-		}
+	//	void mergeSets(point set1Index, point set2Index) {
+	//		//since DSU is built upon a 2D array, we must work with both indices. If a vertex is a root,
+	//		//its value is equal to (-n, -n), where n is the number of elements in the tree
+	//		if (set1Index != set2Index) {
+	//			if (trees[set1Index.first][set1Index.second].first < trees[set2Index.first][set2Index.second].first) {
+	//				trees[set1Index.first][set1Index.second].first += trees[set2Index.first][set2Index.second].first;
+	//				trees[set1Index.first][set1Index.second].second = trees[set1Index.first][set1Index.second].first;
+	//				trees[set2Index.first][set2Index.second] = set1Index;
+	//			}
+	//			else {
+	//				trees[set2Index.first][set2Index.second].first += trees[set1Index.first][set1Index.second].first;
+	//				trees[set2Index.first][set2Index.second].second = trees[set2Index.first][set2Index.second].first;
+	//				trees[set1Index.first][set1Index.second] = set2Index;
+	//			}
+	//		}
+	//	}
 
-		point find(point what) {
-			point cur = what;
-			point lastCur = cur;
-			while (cur.first >= 0) {
-				lastCur = cur;
-				cur = trees[cur.first][cur.second];
-			}
-			return lastCur;
-		}
+	//	point find(point what) {
+	//		point cur = what;
+	//		point lastCur = cur;
+	//		while (cur.first >= 0) {
+	//			lastCur = cur;
+	//			cur = trees[cur.first][cur.second];
+	//		}
+	//		return lastCur;
+	//	}
 
-		size_t size() const {
-			return trees.size();
-		}
+	//	size_t size() const {
+	//		return trees.size();
+	//	}
 
-		point& get(size_t i, size_t j) {
-			return trees[i][j];
-		}
+	//	point& get(size_t i, size_t j) {
+	//		return trees[i][j];
+	//	}
 
-	};
+	//};
 
 	class DSU {
 
@@ -127,7 +128,7 @@ struct Rectangle {
 	}
 
 	bool contains(point x) {
-		return ((x.first >= leftLow.first) && (x.first < rightHigh.first)) && ((x.second >= leftLow.second) && (x.second < rightHigh.second));
+		return ((x.first >= leftLow.first) && (x.first < rightHigh.first) && (x.second >= leftLow.second) && (x.second < rightHigh.second));
 	}
 
 };
@@ -168,44 +169,42 @@ int main() {
 	ofstream out("out.txt");
 	short n;
 	in >> a >> b >> n;
+	int m = max(a, b);
 	vector<Rectangle> rects(n);
+	map<int, short> vertices;
 	for (size_t i = 0; i < n; ++i) {
 		in >> rects[i].leftLow.first >> rects[i].leftLow.second;
 		in >> rects[i].rightHigh.first >> rects[i].rightHigh.second;
 		in >> rects[i].color;
 		rects[i].translate();
 	}
-	int m = max(a, b);
+	for (int i = rects.size() - 1; i >= 0; --i) {
+		vertices.insert({ rects[i].leftLow.first * m + rects[i].leftLow.second, rects[i].color });
+		vertices.insert({ rects[i].leftLow.first * m + rects[i].rightHigh.second, rects[i].color });
+		vertices.insert({ rects[i].rightHigh.first * m + rects[i].rightHigh.second, rects[i].color });
+		vertices.insert({ rects[i].rightHigh.first * m + rects[i].leftLow.second, rects[i].color });
+	}
 	data_structures::DSU rectanglesDSU(m);
 	short color = 0;
 	int cur;
-	for (size_t j = 0; j < a; ++j) {
-		for (size_t i = 0; i < b; ++i) {
+	map<int, short>::iterator iter;
+	for (size_t i = 0; i < b; ++i) {
+		for (size_t j = 0; j < a; ++j) {
 			cur = i * m + j;
 			color = getColor(rects, i, j);
 			//merge if colors are the same
 			if ((i >= 1) && (getColor(rects, i - 1, j) == color)) {
 				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j), rectanglesDSU.find(cur));
 			}
-			if ((i >= 1) && (j >= 1) && (getColor(rects, i - 1, j - 1) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j - 1), rectanglesDSU.find(cur));
-			}
 			if ((j >= 1) && (getColor(rects, i, j - 1) == color)) {
 				rectanglesDSU.mergeSets(rectanglesDSU.find(i * m + j - 1), rectanglesDSU.find(cur));
 			}
-			if ((j >= 1) && (i + 1 < b) && (getColor(rects, i + 1, j - 1) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find((i + 1) * m + j - 1), rectanglesDSU.find(cur));
+			iter = vertices.find(cur);
+			if ((i >= 1) && (j >= 1) && (getColor(rects, i - 1, j - 1) == color) && (iter != vertices.end()) && ((*iter).second == color)) {
+				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j - 1), rectanglesDSU.find(cur));
 			}
-			if ((i + 1 < b) && (getColor(rects, i + 1, j) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find((i + 1) * m + j), rectanglesDSU.find(cur));
-			}
-			if ((i + 1 < b) && (j + 1 < a) && (getColor(rects, i + 1, j + 1) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find((i + 1) * m + j + 1), rectanglesDSU.find(cur));
-			}
-			if ((j + 1 < a) && (getColor(rects, i, j + 1) == color)) {
-				rectanglesDSU.mergeSets(rectanglesDSU.find(i * m + j + 1), rectanglesDSU.find(cur));
-			}
-			if ((i >= 1) && (j + 1 < a) && (getColor(rects, i - 1, j + 1) == color)) {
+			iter = vertices.find(i * m + j + 1);
+			if ((i >= 1) && (j + 1 < a) && (getColor(rects, i - 1, j + 1) == color) && (iter != vertices.end()) && ((*iter).second == color)) {
 				rectanglesDSU.mergeSets(rectanglesDSU.find((i - 1) * m + j + 1), rectanglesDSU.find(cur));
 			}
 		}
@@ -226,5 +225,7 @@ int main() {
 	for (size_t i = 0; i < size; ++i) {
 		out << rectangleAreas[i].first << ' ' << rectangleAreas[i].second << endl;
 	}
+	drawColors(rects);
+	system("pause");
 	return 0;
 }
