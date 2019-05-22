@@ -115,7 +115,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Rectangles.cpp" />
     <ClCompile Include="Scan.cpp" />
   </ItemGroup>

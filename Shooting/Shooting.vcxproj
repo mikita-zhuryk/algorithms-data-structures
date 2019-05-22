@@ -116,6 +116,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BFS.cpp" />
+    <ClCompile Include="MaxFlow.cpp" />
+    <ClCompile Include="MaxMatching.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt" />

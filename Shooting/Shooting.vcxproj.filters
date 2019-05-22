@@ -18,6 +18,12 @@
     <ClCompile Include="BFS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MaxMatching.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MaxFlow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt">
