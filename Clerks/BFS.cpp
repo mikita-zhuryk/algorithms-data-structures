@@ -7,7 +7,7 @@ using namespace std;
 
 vector<pair<int, int>> bfs(vector<vector<pair<int, int>>>& adjList) {
 	int n = adjList.size();
-	vector<pair<int, int>> path(n, { 0, 0 });
+	vector<pair<int, int>> path(n, { -1, INT_MAX });
 	path[0] = { -1, 0 };
 	queue<int> q;
 	q.push(0);
